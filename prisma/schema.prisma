@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Escola {
+  id        String     @id @default(uuid())
+  nome      String     @unique
+  endereco  String?
+  // Relacionamentos 1:N com as outras models
+  docentes  Docente[]
+  alunos    Aluno[]
+  turmas    Turma[]
+  materias  Materia[]
+  atividades Atividade[]
+  avaliacao Avaliacao[]
+  notaBimestral NotaBimestral[]
+  observacaoAluno ObservacaoAluno[]
+  insight Insight[]
+}
+
+model Acesso {
+  id       String    @id @default(uuid())
+  nome     String
+  docentes Docente[]
+}
+
+model Docente {
+  id            String     @id @default(uuid())
+  nome          String
+  email         String?    @unique
+  registro      String     @unique
+  senha         String
+  nivelAcesso   String
+  acesso        Acesso     @relation(fields: [nivelAcesso], references: [id])
+  atividades    Atividade[]
+  avaliacoes    Avaliacao[]
+  observacoes   ObservacaoAluno[]
+  // Adicionado a relação com a Escola
+  escolaId      String?
+  escola        Escola?    @relation(fields: [escolaId], references: [id])
+}
+
+model Aluno {
+  id              String      @id @default(uuid())
+  Nome            String
+  Matricula       String      @unique
+  Idade           Int?
+  turmaId         String
+  turma           Turma       @relation(fields: [turmaId], references: [id])
+  condicao       CondicaoAluno[]
+  avaliacoes      Avaliacao[]
+  observacoes     ObservacaoAluno[]
+  notasBimestrais NotaBimestral[]
+  insights        Insight[]
+  // Adicionado a relação com a Escola
+  escolaId        String?
+  escola          Escola?     @relation(fields: [escolaId], references: [id])
+}
+
+model Turma {
+  id      String @id @default(uuid())
+  Nome    String @unique
+  Alunos Aluno[]
+  // Adicionado a relação com a Escola
+  escolaId String?
+  escola   Escola? @relation(fields: [escolaId], references: [id])
+}
+
+model Materia {
+  id        String      @id @default(uuid())
+  nome      String      @unique
+  atividades Atividade[]
+  notas     NotaBimestral[]
+  // Adicionado a relação com a Escola
+  escolaId  String?
+  escola    Escola?      @relation(fields: [escolaId], references: [id])
+}
+
+model Atividade {
+  id                   String     @id @default(uuid())
+  tipo                 String
+  local                String
+  tempoFinalizacao     String
+  dinamica             String
+  comConsulta          Boolean
+  liberdadeCriativa    Boolean
+  descricaoAdicional   String?
+  notaMaxima           Float
+  materiaId            String
+  materia              Materia    @relation(fields: [materiaId], references: [id])
+  professorId          String
+  professor            Docente    @relation(fields: [professorId], references: [id])
+  avaliacoes           Avaliacao[]
+  // Adicionado a relação com a Escola
+  escolaId             String?
+  escola               Escola?     @relation(fields: [escolaId], references: [id])
+}
+
+model Avaliacao {
+  id                  String     @id @default(uuid())
+  notaNumerica        Float
+  avaliacaoEscrita    String?
+  entregouNoPrazo     Boolean    @default(false)
+  observacaoPrazo     String?
+  dataAvaliacao       DateTime   @default(now())
+  alunoId             String
+  atividadeId         String
+  professorId         String 
+  aluno               Aluno      @relation(fields: [alunoId], references: [id])
+  atividade           Atividade  @relation(fields: [atividadeId], references: [id])
+  professor           Docente    @relation(fields: [professorId], references: [id]) 
+  escolaId            String? // Adicionado a relação com a Escola
+  escola              Escola?     @relation(fields: [escolaId], references: [id])
+
+  @@unique([alunoId, atividadeId])
+}
+
+model CondicaoAluno {
+  id                   String   @id @default(uuid())
+  alunoId              String
+  nomeCondicao         String
+  statusComprovacao    String
+  descricaoAdicional   String? 
+  dataCadastro         DateTime @default(now())
+
+  aluno                Aluno    @relation(fields: [alunoId], references: [id])
+
+  @@unique([alunoId, nomeCondicao])
+}
+
+model NotaBimestral {
+  id          String    @id @default(uuid())
+  bimestre    Int
+  nota        Float
+  recuperacao Boolean
+  alunoId     String
+  aluno       Aluno     @relation(fields: [alunoId], references: [id])
+  materiaId   String
+  materia     Materia   @relation(fields: [materiaId], references: [id])
+  // Adicionado a relação com a Escola
+  escolaId    String?
+  escola      Escola?    @relation(fields: [escolaId], references: [id])
+
+  @@unique([alunoId, materiaId, bimestre])
+}
+
+model ObservacaoAluno {
+  id           String    @id @default(uuid())
+  texto        String
+  data         DateTime  @default(now())
+  professorId  String
+  professor    Docente   @relation(fields: [professorId], references: [id])
+  alunoId      String
+  aluno        Aluno     @relation(fields: [alunoId], references: [id])
+  // Adicionado a relação com a Escola
+  escolaId     String?
+  escola       Escola?    @relation(fields: [escolaId], references: [id])
+}
+
+model Insight {
+  id              String   @id @default(uuid())
+  dataGeracao     DateTime @default(now())
+  jsonInput       Json
+  textoInsight    String
+  alunoId         String
+  aluno           Aluno    @relation(fields: [alunoId], references: [id])
+  // Adicionado a relação com a Escola
+  escolaId        String?
+  escola          Escola?   @relation(fields: [escolaId], references: [id])
+}

@@ -1,0 +1,18 @@
+#Dependências
+/node_modules
+
+#Arquivos de build
+/dist
+/build
+/lib
+
+#Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+#Prisma
+/prisma/migrations
+
+#Logs e Cache do TypeScript
+*.tsbuildinfo
