@@ -52,8 +52,8 @@ router.get("/aluno/:alunoId", authenticateToken, async (req, res) => {
 
 // Rota POST: Atribuir ou atualizar uma Avaliação (FINAL E CORRIGIDA)
 router.post("/", authenticateToken, async (req, res) => {
-    // Extrai o campo 'entregouNoPrazo' (String) e outros dados
-    const { alunoId, atividadeId, notaNumerica, avaliacaoEscrita, entregouNoPrazo, professorId } = req.body; 
+    // Extrai o campo 'observacaoPrazo' (String) e outros dados
+    const { alunoId, atividadeId, notaNumerica, avaliacaoEscrita, observacaoPrazo, professorId } = req.body; 
 
     if (!alunoId || !atividadeId || notaNumerica === undefined || !professorId) {
         return res.status(400).json({ error: "Dados da avaliação incompletos." });
@@ -81,7 +81,7 @@ router.post("/", authenticateToken, async (req, res) => {
                 notaNumerica: notaNumerica,
                 avaliacaoEscrita: avaliacaoEscrita,
                 // CORRIGIDO: Aceita a string diretamente do frontend
-                entregouNoPrazo: entregouNoPrazo, 
+                observacaoPrazo: observacaoPrazo, 
                 dataAvaliacao: new Date(),
             },
             create: {
@@ -91,7 +91,7 @@ router.post("/", authenticateToken, async (req, res) => {
                 notaNumerica: notaNumerica,
                 avaliacaoEscrita: avaliacaoEscrita,
                 // CORRIGIDO: Aceita a string diretamente do frontend
-                entregouNoPrazo: entregouNoPrazo,
+                observacaoPrazo: observacaoPrazo,
             }
         });
         
