@@ -53,7 +53,7 @@ router.get("/aluno/:alunoId", authenticateToken, async (req, res) => {
 // Função utilitária para simular delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function retryGenerateInsight(fullPrompt: string, maxRetries: number = 3) {
+async function retryGenerateInsight(fullPrompt: string, maxRetries: number = 5) {
     if (!GEMINI_API_KEY) {
         throw new Error("GEMINI_API_KEY não está definida.");
     }
@@ -75,7 +75,7 @@ async function retryGenerateInsight(fullPrompt: string, maxRetries: number = 3) 
             }
             
             // Log do erro 503 e espera o tempo de backoff
-            const delayTime = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+            const delayTime = Math.pow(2, attempt) * 2000; // 1s, 2s, 4s
             console.warn(`[Gemini API] 503 Sobrecarga (Tentativa ${attempt + 1}/${maxRetries}). Tentando novamente em ${delayTime / 1000}s...`);
             await delay(delayTime);
         }
@@ -108,6 +108,8 @@ router.post("/aluno/:alunoId", authenticateToken, async (req, res) => {
         - Identifique flutuações de notas e o que elas indicam sobre o estilo de aprendizagem.
         - Observe atrasos, engajamento, comportamento e padrões recorrentes.
         - Não invente dados.
+        - Evite utilizar termos técnicos de TI (Como 'JSON')
+        - O texto deve ser Limpo (substitua asteríscos por caixa alta, não utilize negrito)
 
         ---
 
